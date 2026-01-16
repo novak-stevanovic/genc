@@ -3,6 +3,7 @@
 GENC_VECTOR_GENERATE(test_int_vec, int, 2.0, NULL);
 GENC_VECTOR_GENERATE(test_intptr_vec, int*, 2.0, NULL);
 GENC_LIST_GENERATE(test_int_list, int, NULL);
+GENC_SIMPLE_LIST_GENERATE(test_int_slist, int);
 
 #include <assert.h>
 #include <stdio.h>

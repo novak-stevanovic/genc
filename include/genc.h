@@ -33,6 +33,8 @@ THE SOFTWARE.
 
 /* -------------------------------------------------------------------------- */
 
+/* Types: VECTOR, LIST, SIMPLE LIST. */
+
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -98,55 +100,28 @@ typedef int (*genc_cmp_fn)(const void* container_data, const void* user_data);
  * BEHAVIOR
  * ---------------------------------------------------------
  *
- * void <name>_init() initializes the vector. It allocates the initial chunk of memory.
+ * void genc_simple_list_init() initializes an empty list.
  * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL or `init_cap` is 0,
- * 2) GENC_ERR_ALLOC_FAIL - initial allocation failed.
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL.
  *
- * void <name>_deinit() deinitializes the vector and frees all used memory.
+ * void genc_simple_list_deinit() frees all nodes in the list.
  * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL.
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL.
  *
- * void <name>_pushb() appends `data` to the end (back) of the vector.
+ * void genc_simple_list_pushb() appends a copy of `data` to the end of the list.
  * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
- * 2) GENC_ERR_ALLOC_FAIL - vector attempted to grow, allocation/realloc failed.
+ * 1) GENC_ERR_INVALID_ARG - `list` or `data` is NULL, or `data_size` is 0,
+ * 2) GENC_ERR_ALLOC_FAIL - memory allocation failed.
  *
- * void <name>_popb() removes the last element from the vector.
+ * void genc_simple_list_pushf() prepends a copy of `data` to the front of the list.
  * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
- * 2) GENC_ERR_OUT_OF_BOUNDS - vector is empty.
+ * 1) GENC_ERR_INVALID_ARG - `list` or `data` is NULL, or `data_size` is 0,
+ * 2) GENC_ERR_ALLOC_FAIL - memory allocation failed.
  *
- * void <name>_ins() inserts `data` at position `pos`. If pos == size, insertion appends.
+ * void genc_simple_list_popf() removes the first node from the list.
  * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
- * 2) GENC_ERR_OUT_OF_BOUNDS - `pos` is greater than the size of the vector,
- * 3) GENC_ERR_ALLOC_FAIL - vector attempted to grow, allocation/realloc failed.
- *
- * void <name>_rm_at() removes the element at position `pos`.
- * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
- * 2) GENC_ERR_OUT_OF_BOUNDS - `pos` is greater than or equal to the size of the vector.
- *
- * void <name>_rm() removes the first occurrence of `data` found in the vector.
- * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
- * 2) GENC_ERR_NO_DATA - found no matching `data` in `vec`.
- *
- * size_t <name>_find() searches for `data` and returns the position of the
- * first occurrence. On failure it returns `SIZE_MAX`.
- * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL.
- *
- * bool <name>_exists() returns true if `data` exists in the vector.
- * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL.
- *
- * void <name>_fit() shrinks the vector's capacity to match its size.
- * ERRORS:
- * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
- * 2) GENC_ERR_ALLOC_FAIL - realloc failed.
- *
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_NO_DATA - the list is empty.*
  */
 
 /* ---------------------------------------------------------------- */
@@ -282,7 +257,7 @@ name##_exists(const struct name * v, const type data, int* out)                \
 /* -------------------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------- */
-/* LIST - PUBLIC                                                     */
+/* LIST - PUBLIC */
 /* ---------------------------------------------------------------- */
 
 /* 
@@ -582,6 +557,141 @@ name##_exists(const struct name * l, const type data, int* out)                \
 {                                                                              \
     return genc_list_exists((const struct genc_list*)l, (const void*)&data,    \
                             cmp_fn, sizeof( type ), out);                      \
+}
+
+/* -------------------------------------------------------------------------- */
+/* SIMPLE LIST */
+/* -------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------- */
+/* SIMPLE LIST - PUBLIC */
+/* ---------------------------------------------------------------- */
+
+/* 
+ * GENC_SIMPLE_LIST_GENERATE(name, type) generates a type-safe forward list
+ * list API. This data structure is meant to be used for creating a stack
+ * or queue.
+ *
+ * ---------------------------------------------------------
+ * PROTOTYPES
+ * ---------------------------------------------------------
+ * 
+ * struct <name>_node
+ * {
+ *     <type> data;
+ *     struct <name>_node* next;
+ * };
+ * 
+ * struct <name>
+ * {
+ *     size_t size;
+ *     struct <name>_node *head, *tail;
+ * };
+ *
+ * void <name>_init(struct <name>* list, int* out_status);
+ * void <name>_deinit(struct <name>* list, int* out_status);
+ * void <name>_pushb(struct <name>* list, const <type> data, int* out_status);
+ * void <name>_pushf(struct <name>* list, const <type> data, int* out_status);
+ * void <name>_popf(struct <name>* list, int* out_status);
+ *
+ * ---------------------------------------------------------
+ * BEHAVIOR
+ * ---------------------------------------------------------
+ * 
+ * void genc_simple_list_init() initializes an empty list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL.
+ *
+ * void genc_simple_list_deinit() frees all nodes in the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_UNEXPECTED - an internal pop failed.
+ *
+ * void genc_simple_list_pushb() appends a copy of `data` to the end of the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` or `data` is NULL, or `data_size` is 0,
+ * 2) GENC_ERR_ALLOC_FAIL - memory allocation failed.
+ *
+ * void genc_simple_list_pushf() prepends a copy of `data` to the front of the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` or `data` is NULL, or `data_size` is 0,
+ * 2) GENC_ERR_ALLOC_FAIL - memory allocation failed.
+ *
+ * void genc_simple_list_popf() removes the first node from the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_NO_DATA - the list is empty.
+ *
+ */
+
+/* ---------------------------------------------------------------- */
+/* SIMPLE LIST - PRIVATE */
+/* ---------------------------------------------------------------- */
+
+struct genc_simple_list_node
+{
+    void* data;
+    struct genc_simple_list_node* next;
+};
+
+struct genc_simple_list
+{
+    size_t size;
+    struct genc_simple_list_node *head, *tail;
+};
+
+void genc_simple_list_init(struct genc_simple_list* list, int* out_status);
+void genc_simple_list_deinit(struct genc_simple_list* list, int* out_status);
+
+void genc_simple_list_pushb(struct genc_simple_list* list, const void* _data,
+                            size_t __datasz, int* out_status);
+void genc_simple_list_pushf(struct genc_simple_list* list, const void* _data,
+                            size_t __datasz, int* out_status);
+void genc_simple_list_popf(struct genc_simple_list* list, int* out_status);
+
+/* ---------------------------------------------------------------- */
+/* SIMPLE LIST - GENERATOR MACRO */
+/* ---------------------------------------------------------------- */
+
+#define GENC_SIMPLE_LIST_GENERATE(name, type)                                  \
+                                                                               \
+struct name##_node                                                             \
+{                                                                              \
+    type * data;                                                               \
+    struct name##_node* next;                                                  \
+};                                                                             \
+                                                                               \
+struct name                                                                    \
+{                                                                              \
+    size_t size;                                                               \
+    struct name##_node *head, *tail;                                           \
+};                                                                             \
+                                                                               \
+void name##_init(struct name * list, int* out)                                 \
+{                                                                              \
+    genc_simple_list_init((struct genc_simple_list*)list, out);                \
+}                                                                              \
+                                                                               \
+void name##_deinit(struct name * list, int* out)                               \
+{                                                                              \
+    genc_simple_list_deinit((struct genc_simple_list*)list, out);              \
+}                                                                              \
+                                                                               \
+void name##_pushb(struct name * l, const type data, int* out)                  \
+{                                                                              \
+    genc_simple_list_pushb((struct genc_simple_list*)l,                        \
+                           (const void*)&data, sizeof( type ), out);           \
+}                                                                              \
+                                                                               \
+void name##_pushf(struct name * l, const type data, int* out)                  \
+{                                                                              \
+    genc_simple_list_pushf((struct genc_simple_list*)l,                        \
+                           (const void*)&data, sizeof( type ), out);           \
+}                                                                              \
+                                                                               \
+void name##_popf(struct name * l, int* out)                                    \
+{                                                                              \
+    genc_simple_list_popf((struct genc_simple_list*)l, out);                   \
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1375,6 +1485,171 @@ bool genc_list_exists(const struct genc_list* list, const void* _data,
                       genc_cmp_fn __cmp_fn, size_t __datasz, int* out_status)
 {
     return (genc_list_find(list, _data, __cmp_fn, __datasz, out_status) != NULL);
+}
+
+/* -------------------------------------------------------------------------- */
+/* SIMPLE LIST */
+/* -------------------------------------------------------------------------- */
+
+static struct genc_simple_list_node*
+_genc_simple_list_node_create(const void* data, size_t data_size)
+{
+    size_t node_size = sizeof(struct genc_simple_list_node);
+    struct genc_simple_list_node* node = (struct genc_simple_list_node*)
+        malloc(node_size);
+
+    if(node == NULL) return NULL;
+
+    node->data = malloc(data_size);
+    if(node->data == NULL)
+    {
+        free(node);
+        return NULL;
+    }
+
+    memcpy(node->data, data, data_size);
+    node->next = NULL;
+
+    return node;
+}
+
+void genc_simple_list_init(struct genc_simple_list* list, int* out_status)
+{
+    SET_OUT(out_status, GENC_SUCCESS);
+    
+    if(list == NULL)
+    {
+        SET_OUT(out_status, GENC_ERR_INVALID_ARG);
+        return;
+    }
+
+    list->size = 0;
+    list->head = NULL;
+    list->tail = NULL;
+}
+
+void genc_simple_list_deinit(struct genc_simple_list* list, int* out_status)
+{
+    SET_OUT(out_status, GENC_SUCCESS);
+    
+    if(list == NULL)
+    {
+        SET_OUT(out_status, GENC_ERR_INVALID_ARG);
+        return;
+    }
+    
+    int _status;
+    
+    while(list->size > 0)
+    {
+        genc_simple_list_popf(list, &_status);
+
+        if(_status != GENC_SUCCESS)
+        {
+            SET_OUT(out_status, GENC_ERR_UNEXPECTED);
+            return;
+        }
+    }
+
+    list->size = 0;
+    list->head = NULL;
+    list->tail = NULL;
+}
+
+void genc_simple_list_pushb(struct genc_simple_list* list, const void* _data,
+                            size_t __datasz, int* out_status)
+{
+    SET_OUT(out_status, GENC_SUCCESS);
+    
+    if(list == NULL)
+    {
+        SET_OUT(out_status, GENC_ERR_INVALID_ARG);
+        return;
+    }
+    
+    struct genc_simple_list_node* new_node = _genc_simple_list_node_create(
+            _data, __datasz);
+    if(new_node == NULL)
+    {
+        SET_OUT(out_status, GENC_ERR_ALLOC_FAIL);
+        return;
+    }
+
+    if(list->size == 0)
+    {
+        list->head = new_node;
+        list->tail = new_node;
+    }
+    else
+    {
+        list->tail->next = new_node;
+        list->tail = new_node;
+    }
+
+    ++(list->size);
+}
+
+void genc_simple_list_pushf(struct genc_simple_list* list, const void* _data,
+                            size_t __datasz, int* out_status)
+{
+    SET_OUT(out_status, GENC_SUCCESS);
+    
+    if(list == NULL)
+    {
+        SET_OUT(out_status, GENC_ERR_INVALID_ARG);
+        return;
+    }
+
+    struct genc_simple_list_node* new_node = _genc_simple_list_node_create(
+            _data, __datasz);
+    if(new_node == NULL)
+    {
+        SET_OUT(out_status, GENC_ERR_ALLOC_FAIL);
+        return;
+    }
+
+    if(list->size == 0)
+    {
+        list->head = new_node;
+        list->tail = new_node;
+    }
+    else
+    {
+        new_node->next = list->head;
+        list->head = new_node;
+    }
+
+    ++(list->size);
+}
+
+void genc_simple_list_popf(struct genc_simple_list* list, int* out_status)
+{
+    SET_OUT(out_status, GENC_SUCCESS);
+    
+    if(list == NULL)
+    {
+        SET_OUT(out_status, GENC_ERR_INVALID_ARG);
+        return;
+    }
+
+    if(list->size == 0)
+    {
+        free(list->head->data);
+        free(list->head);
+        list->head = NULL;
+        list->tail = NULL;
+    }
+    else
+    {
+        struct genc_simple_list_node* old_head = list->head;
+
+        list->head = list->head->next;
+
+        free(old_head->data);
+        free(old_head);
+    }
+
+    --(list->size);
 }
 
 /* -------------------------------------------------------------------------- */
