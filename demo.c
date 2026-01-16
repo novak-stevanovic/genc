@@ -57,7 +57,7 @@ int main()
     size_t i;
     for(i = 0; i < list.size; i++)
     {
-        printf("%d ", *(test_int_list_at(&list, i))->data);
+        printf("%d ", *(test_int_list_at(&list, i, NULL))->data);
     }
     printf("\n");
 

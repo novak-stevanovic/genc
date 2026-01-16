@@ -1,14 +1,40 @@
+/*
+
+MIT License
+
+Copyright (c) 2025 Novak Stevanović
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights  
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
+copies of the Software, and to permit persons to whom the Software is  
+furnished to do so, subject to the following conditions:  
+
+The above copyright notice and this permission notice shall be included in all  
+copies or substantial portions of the Software.  
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN  
+THE SOFTWARE.  
+
+*/
+
 #ifndef GENC_H
 #define GENC_H
-
-#include <stddef.h>
-#include <stdbool.h>
 
 /* -------------------------------------------------------------------------- */
 
 /* HEADER BEGIN */
 
 /* -------------------------------------------------------------------------- */
+
+#include <stddef.h>
+#include <stdbool.h>
 
 /* -------------------------------------------------------------------------- */
 /* DEFINE */
@@ -32,43 +58,96 @@ typedef int (*genc_cmp_fn)(const void* container_data, const void* user_data);
 /* ---------------------------------------------------------------- */
 
 /* 
+ * GENC_VECTOR_GENERATE(name, type, growf, cmp_fn) generates a type-safe dynamic
+ * vector API.
 
-GENC_VECTOR_GENERATE(name, type, growf, cmp_fn) generates code:
-
-struct <name>
-{
-    <type>* data;
-    size_t size;
-    size_t cap;
-};
-
-struct <name>_view
-{
-    const <type>* data;
-    size_t size;
-};
-
-void <name>_init(struct <name>* vector, size_t init_cap, int* out_status);
-
-void <name>_deinit(struct <name>* vector, int* out_status);
-
-void <name>_ins(struct <name>* vector, const <type> data, size_t pos, int* out_status);
-
-void <name>_rm_at(struct <name>* vector, size_t pos, int* out_status);
-
-void <name>_fit(struct <name>* vector, int* out_status);
-
-size_t <name>_find(const struct <name>* vector, const <type> data, int* out_status);
-
-void <name>_popb(struct <name>* vector, int* out_status);
-
-void <name>_rm(struct <name>* vector, const <type> data, int* out_status);
-
-void <name>_pushb(struct <name>* vector, const <type> data, int* out_status);
-
-bool <name>_exists(const struct <name>* vector, const <type> data, int* out_status);
-
-*/
+ * `cmp_fn` is used for element comparisons, such as in `find()` or `rm`
+ * functions. If `cmp_fn` is NULL, memcmp() is used instead.
+ * `growf` specifies the vector’s growth factor. A value of 1.5 balances
+ * memory usage and realloc efficiency.
+ *
+ * ---------------------------------------------------------
+ * PROTOTYPES
+ * ---------------------------------------------------------
+ * 
+ * struct <name>
+ * {
+ *     <type>* data;
+ *     size_t size;
+ *     size_t cap;
+ * };
+ * 
+ * struct <name>_view
+ * {
+ *     const <type>* data;
+ *     size_t size;
+ * };
+ *
+ * void <name>_init(struct <name>* vec, size_t init_cap, int* out_status);
+ * void <name>_deinit(struct <name>* vec, int* out_status);
+ * void <name>_pushb(struct <name>* vec, <type> data, int* out_status);
+ * void <name>_popb(struct <name>* vec, int* out_status);
+ * void <name>_ins(struct <name>* vec, <type> data, size_t pos, int* out_status);
+ * void <name>_rm_at(struct <name>* vec, size_t pos, int* out_status);
+ * void <name>_rm(struct <name>* vec, <type> data, int* out_status);
+ * size_t <name>_find(const struct <name>* vec, <type> data, int* out_status);
+ * bool <name>_exists(const struct <name>* vec, <type> data, int* out_status);
+ * void <name>_fit(struct <name>* vec, int* out_status); 
+ *
+ * ---------------------------------------------------------
+ * BEHAVIOR
+ * ---------------------------------------------------------
+ *
+ * void <name>_init() initializes the vector. It allocates the initial chunk of memory.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL or `init_cap` is 0,
+ * 2) GENC_ERR_ALLOC_FAIL - initial allocation failed.
+ *
+ * void <name>_deinit() deinitializes the vector and frees all used memory.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL.
+ *
+ * void <name>_pushb() appends `data` to the end (back) of the vector.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
+ * 2) GENC_ERR_ALLOC_FAIL - vector attempted to grow, allocation/realloc failed.
+ *
+ * void <name>_popb() removes the last element from the vector.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
+ * 2) GENC_ERR_OUT_OF_BOUNDS - vector is empty.
+ *
+ * void <name>_ins() inserts `data` at position `pos`. If pos == size, insertion appends.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
+ * 2) GENC_ERR_OUT_OF_BOUNDS - `pos` is greater than the size of the vector,
+ * 3) GENC_ERR_ALLOC_FAIL - vector attempted to grow, allocation/realloc failed.
+ *
+ * void <name>_rm_at() removes the element at position `pos`.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
+ * 2) GENC_ERR_OUT_OF_BOUNDS - `pos` is greater than or equal to the size of the vector.
+ *
+ * void <name>_rm() removes the first occurrence of `data` found in the vector.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
+ * 2) GENC_ERR_NO_DATA - found no matching `data` in `vec`.
+ *
+ * size_t <name>_find() searches for `data` and returns the position of the
+ * first occurrence. On failure it returns `SIZE_MAX`.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL.
+ *
+ * bool <name>_exists() returns true if `data` exists in the vector.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL.
+ *
+ * void <name>_fit() shrinks the vector's capacity to match its size.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `vec` is NULL,
+ * 2) GENC_ERR_ALLOC_FAIL - realloc failed.
+ *
+ */
 
 /* ---------------------------------------------------------------- */
 /* VECTOR - PRIVATE */
@@ -104,14 +183,14 @@ size_t genc_vector_find(const struct genc_vector* v, const void* _data,
 
 void genc_vector_popb(struct genc_vector* v, size_t __datasz, int* out_status);
 
-void genc_vector_rm(struct genc_vector* v, const void* _data, genc_cmp_fn _cmp_fn,
-                    size_t __datasz, int* out_status);
+void genc_vector_rm(struct genc_vector* v, const void* _data,
+                    genc_cmp_fn __cmp_fn, size_t __datasz, int* out_status);
 
 void genc_vector_pushb(struct genc_vector* v, const void* _data, size_t __datasz,
                        double __growf, int* out_status);
 
 bool genc_vector_exists(const struct genc_vector* v, const void* _data,
-                        genc_cmp_fn _cmp_fn, size_t __datasz, int* out_status);
+                        genc_cmp_fn __cmp_fn, size_t __datasz, int* out_status);
 
 /* ---------------------------------------------------------------- */
 /* VECTOR - GENERATOR MACRO */
@@ -203,8 +282,135 @@ name##_exists(const struct name * v, const type data, int* out)                \
 /* -------------------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------- */
-/* LIST - PUBLIC */
+/* LIST - PUBLIC                                                     */
 /* ---------------------------------------------------------------- */
+
+/* 
+ * GENC_LIST_GENERATE(name, type, cmp_fn) generates a type-safe doubly-linked
+ * list API.
+
+ * `cmp_fn` is used for element comparisons, such as in `find()` or `rm`
+ * functions. If `cmp_fn` is NULL, memcmp() is used instead.
+ *
+ * ---------------------------------------------------------
+ * PROTOTYPES
+ * ---------------------------------------------------------
+ * 
+ * struct <name>_node
+ * {
+ *     <type> data;
+ *     struct <name>_node* next;
+ *     struct <name>_node* prev;
+ * };
+ * 
+ * struct <name>
+ * {
+ *     size_t size;
+ *     struct <name>_node* head;
+ *     struct <name>_node* tail;
+ * };
+ *
+ * void <name>_init(struct <name>* list, int* out_status);
+ * void <name>_deinit(struct <name>* list, int* out_status);
+ *
+ * void <name>_pushb(struct <name>* list, <type> data, int* out_status);
+ * void <name>_pushf(struct <name>* list, <type> data, int* out_status);
+ * void <name>_popb(struct <name>* list, int* out_status);
+ * void <name>_popf(struct <name>* list, int* out_status);
+ *
+ * struct <name>_node*
+ * <name>_at(const struct <name>* list, size_t pos, int* out_status);
+
+ * struct <name>_node*
+ * <name>_find(const struct <name>* list, <type> data, int* out_status);
+ * 
+ * bool <name>_exists(const struct <name>* list, <type> data, int* out_status);
+ *
+ * void <name>_ins_after_node(struct <name>* list, <type> data,
+ *                            struct <name>_node* node, int* out_status);
+ * void <name>_ins_before_node(struct <name>* list, <type> data,
+ *                             struct <name>_node* node, int* out_status);
+ * void <name>_ins_at(struct <name>* list, <type> data, size_t pos,
+                      int* out_status);
+ *
+ * void <name>_rm_node(struct <name>* list, struct <name>_node* node,
+                       int* out_status);
+ * void <name>_rm(struct <name>* list, <type> data, int* out_status);
+ *
+ * ---------------------------------------------------------
+ * BEHAVIOR
+ * ---------------------------------------------------------
+ *
+ * void <name>_init() initializes the list to empty.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL.
+ *
+ * void <name>_deinit() deinitializes the list and frees all nodes.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL.
+ *
+ * void <name>_pushb() appends `data` at the tail of the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_ALLOC_FAIL - allocation failed.
+ *
+ * void <name>_pushf() prepends `data` at the head of the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_ALLOC_FAIL - allocation failed.
+ *
+ * void <name>_popf() removes the head element.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_NO_DATA - list is empty.
+ *
+ * void <name>_popb() removes the tail element.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_NO_DATA - list is empty.
+ *
+ * struct <name>_node* <name>_at() returns pointer to node at index `pos`.
+ * Returns NULL on invalid arg or out-of-range.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_OUT_OF_BOUNDS - `pos` >= size,
+ *
+ * struct <name>_node* <name>_find() finds the first node holding `data`.
+ * Returns NULL if not found.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL.
+ *
+ * bool <name>_exists() returns true if `data` exists in the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2)
+ *
+ * void <name>_ins_after_node() inserts `data` after `node`.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_ALLOC_FAIL - allocation failed.
+ *
+ * void <name>_ins_before_node() inserts `data` before `node`.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL or `node` is NULL,
+ * 2) GENC_ERR_ALLOC_FAIL - allocation failed.
+ *
+ * void <name>_ins_at() inserts `data` at index `pos`.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_OUT_OF_BOUNDS - `pos` > size,
+ * 3) GENC_ERR_ALLOC_FAIL - allocation failed.
+ *
+ * void <name>_rm_node() removes the specified node from the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL or `node` is NULL.
+ *
+ * void <name>_rm() removes the first occurrence of `data` from the list.
+ * ERRORS:
+ * 1) GENC_ERR_INVALID_ARG - `list` is NULL,
+ * 2) GENC_ERR_NO_DATA - no matching `data` found.
+ *
+ */
 
 /* ---------------------------------------------------------------- */
 /* LIST - PRIVATE */
@@ -237,7 +443,7 @@ genc_list_find(const struct genc_list* list, const void* _data,
                genc_cmp_fn __cmp_fn, size_t __datasz, int* out_status);
 
 struct genc_list_node*
-genc_list_at(const struct genc_list* list, size_t pos);
+genc_list_at(const struct genc_list* list, size_t pos, int* out_status);
 
 void genc_list_ins_after_node(struct genc_list* list, const void* _data,
                               struct genc_list_node* node, size_t __datasz,
@@ -324,10 +530,10 @@ name##_find(const struct name * l, const type data, int* out)                  \
 }                                                                              \
                                                                                \
 static inline struct name##_node*                                              \
-name##_at(const struct name * l, size_t pos)                                   \
+name##_at(const struct name * l, size_t pos, int* out)                         \
 {                                                                              \
     struct genc_list_node* _node;                                              \
-    _node = genc_list_at((struct genc_list*)l, pos);                           \
+    _node = genc_list_at((struct genc_list*)l, pos, out);                      \
     return ( struct name##_node* )_node;                                       \
 }                                                                              \
                                                                                \
@@ -542,7 +748,7 @@ void genc_vector_fit(struct genc_vector* v, size_t __datasz, int* out_status)
 }
 
 size_t genc_vector_find(const struct genc_vector* v, const void* _data,
-                        genc_cmp_fn _cmp_fn, size_t __datasz, int* out_status)
+                        genc_cmp_fn __cmp_fn, size_t __datasz, int* out_status)
 {
     SET_OUT(out_status, GENC_SUCCESS);
 
@@ -557,13 +763,13 @@ size_t genc_vector_find(const struct genc_vector* v, const void* _data,
     size_t i;
     const void* it_data;
 
-    if(_cmp_fn != NULL)
+    if(__cmp_fn != NULL)
     {
         for(i = 0; i < v->size; i++)
         {
             it_data = vector_data + (i * __datasz);
 
-            if(_cmp_fn(it_data, _data) == 0)
+            if(__cmp_fn(it_data, _data) == 0)
                 return i;
         }
     }
@@ -600,11 +806,18 @@ void genc_vector_popb(struct genc_vector* v, size_t __datasz, int* out_status)
     int _status;
     genc_vector_rm_at(v, v->size - 1, __datasz, &_status);
 
-    if(_status != GENC_SUCCESS) SET_OUT(out_status, GENC_ERR_UNEXPECTED);
+    switch(_status)
+    {
+        case GENC_SUCCESS:
+            return;
+        default:
+            SET_OUT(out_status, GENC_ERR_UNEXPECTED);
+            return;
+    }
 }
 
-void genc_vector_rm(struct genc_vector* v, const void* _data, genc_cmp_fn _cmp_fn,
-                    size_t __datasz, int* out_status)
+void genc_vector_rm(struct genc_vector* v, const void* _data,
+                    genc_cmp_fn __cmp_fn, size_t __datasz, int* out_status)
 {
     SET_OUT(out_status, GENC_SUCCESS);
 
@@ -616,7 +829,7 @@ void genc_vector_rm(struct genc_vector* v, const void* _data, genc_cmp_fn _cmp_f
 
     int _status;
 
-    size_t pos = genc_vector_find(v, _data, _cmp_fn, __datasz, &_status);
+    size_t pos = genc_vector_find(v, _data, __cmp_fn, __datasz, &_status);
     if(_status != GENC_SUCCESS)
     {
         SET_OUT(out_status, GENC_ERR_UNEXPECTED);
@@ -630,7 +843,15 @@ void genc_vector_rm(struct genc_vector* v, const void* _data, genc_cmp_fn _cmp_f
     }
 
     genc_vector_rm_at(v, pos, __datasz, &_status);
-    if(_status != GENC_SUCCESS) SET_OUT(out_status, GENC_ERR_UNEXPECTED);
+
+    switch(_status)
+    {
+        case GENC_SUCCESS:
+            return;
+        default:
+            SET_OUT(out_status, GENC_ERR_UNEXPECTED);
+            return;
+    }
 }
 
 void genc_vector_pushb(struct genc_vector* v, const void* _data, size_t __datasz,
@@ -661,7 +882,7 @@ void genc_vector_pushb(struct genc_vector* v, const void* _data, size_t __datasz
 }
 
 bool genc_vector_exists(const struct genc_vector* v, const void* _data,
-                        genc_cmp_fn _cmp_fn, size_t __datasz, int* out_status)
+                        genc_cmp_fn __cmp_fn, size_t __datasz, int* out_status)
 {
     SET_OUT(out_status, GENC_SUCCESS);
 
@@ -672,7 +893,7 @@ bool genc_vector_exists(const struct genc_vector* v, const void* _data,
     }
 
     int _status;
-    size_t pos = genc_vector_find(v, _data, _cmp_fn, __datasz, &_status);
+    size_t pos = genc_vector_find(v, _data, __cmp_fn, __datasz, &_status);
 
     switch(_status)
     {
@@ -735,11 +956,11 @@ void genc_list_deinit(struct genc_list* list, int* out_status)
         return;
     }
 
+    while(list->size > 0) genc_list_popf(list, NULL);
+
     list->size = 0;
     list->head = NULL;
     list->tail = NULL;
-
-    while(list->size > 0) genc_list_popf(list, NULL);
 }
 
 void genc_list_pushb(struct genc_list* list, const void* _data,
@@ -825,17 +1046,22 @@ void genc_list_popf(struct genc_list* list, int* out_status)
         return;
     }
 
-    struct genc_list_node* old_head = list->head;
-    list->head = list->head->next;
-    list->head->prev = NULL;
-
-    free(old_head->data);
-    free(old_head);
-
     if(list->size == 1)
     {
+        free(list->head->data);
+        free(list->head);
         list->head = NULL;
         list->tail = NULL;
+    }
+    else
+    {
+        struct genc_list_node* old_head = list->head;
+
+        list->head = list->head->next;
+        list->head->prev = NULL;
+
+        free(old_head->data);
+        free(old_head);
     }
 
     --(list->size);
@@ -856,27 +1082,41 @@ void genc_list_popb(struct genc_list* list, int* out_status)
         return;
     }
 
-    struct genc_list_node* old_tail = list->tail;
-    list->tail = list->tail->prev;
-    list->tail->next = NULL;
-
-    free(old_tail->data);
-    free(old_tail);
-
     if(list->size == 1)
     {
+        free(list->head->data);
+        free(list->head);
         list->head = NULL;
         list->tail = NULL;
+    }
+    else
+    {
+        struct genc_list_node* old_tail = list->tail;
+        list->tail = list->tail->prev;
+        list->tail->next = NULL;
+
+        free(old_tail->data);
+        free(old_tail);
     }
 
     --(list->size);
 }
 
 struct genc_list_node*
-genc_list_at(const struct genc_list* list, size_t pos)
+genc_list_at(const struct genc_list* list, size_t pos, int* out_status)
 {
-    if(list == NULL) return NULL;
-    if(pos >= list->size) return NULL;
+    SET_OUT(out_status, GENC_SUCCESS);
+
+    if(list == NULL)
+    {
+        SET_OUT(out_status, GENC_ERR_INVALID_ARG);
+        return NULL;
+    }
+    if(pos >= list->size)
+    {
+        SET_OUT(out_status, GENC_ERR_OUT_OF_BOUNDS);
+        return NULL;
+    }
 
     size_t i;
     struct genc_list_node* it_node = list->head;
@@ -897,7 +1137,6 @@ genc_list_find(const struct genc_list* list, const void* _data,
         return NULL;
     }
 
-    size_t i;
     struct genc_list_node* it_node = list->head;
 
     if(__cmp_fn != NULL)
@@ -1061,26 +1300,45 @@ void genc_list_ins_at(struct genc_list* list, const void* _data, size_t pos,
         SET_OUT(out_status, GENC_ERR_OUT_OF_BOUNDS);
         return;
     }
-    
-    struct genc_list_node* node = genc_list_at(list, pos);
-    if(node == NULL)
-    {
-        SET_OUT(out_status, GENC_ERR_UNEXPECTED);
-        return;
-    }
 
     int _status;
-    genc_list_ins_before_node(list, _data, node, __datasz, &_status);
-    switch(_status)
+
+    if(pos == list->size)
     {
-        case GENC_SUCCESS:
-            return;
-        case GENC_ERR_ALLOC_FAIL:
-            SET_OUT(out_status, GENC_ERR_ALLOC_FAIL);
-            return;
-        default:
+        genc_list_pushb(list, _data, __datasz, &_status);
+        switch(_status)
+        {
+            case GENC_SUCCESS:
+                return;
+            case GENC_ERR_ALLOC_FAIL:
+                SET_OUT(out_status, GENC_ERR_ALLOC_FAIL);
+                return;
+            default:
+                SET_OUT(out_status, GENC_ERR_UNEXPECTED);
+                return;
+        }
+    }
+    else
+    {
+        struct genc_list_node* node = genc_list_at(list, pos, &_status);
+        if(node == NULL)
+        {
             SET_OUT(out_status, GENC_ERR_UNEXPECTED);
             return;
+        }
+
+        genc_list_ins_before_node(list, _data, node, __datasz, &_status);
+        switch(_status)
+        {
+            case GENC_SUCCESS:
+                return;
+            case GENC_ERR_ALLOC_FAIL:
+                SET_OUT(out_status, GENC_ERR_ALLOC_FAIL);
+                return;
+            default:
+                SET_OUT(out_status, GENC_ERR_UNEXPECTED);
+                return;
+        }
     }
 }
 
