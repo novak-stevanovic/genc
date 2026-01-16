@@ -79,12 +79,6 @@ typedef int (*genc_cmp_fn)(const void* container_data, const void* user_data);
  *     size_t cap;
  * };
  * 
- * struct <name>_view
- * {
- *     const <type>* data;
- *     size_t size;
- * };
- *
  * void <name>_init(struct <name>* vec, size_t init_cap, int* out_status);
  * void <name>_deinit(struct <name>* vec, int* out_status);
  * void <name>_pushb(struct <name>* vec, <type> data, int* out_status);
@@ -135,12 +129,6 @@ struct genc_vector
     size_t cap;
 };
 
-struct genc_vector_view
-{
-    const void* data;
-    size_t size;
-};
-
 void genc_vector_init(struct genc_vector* v, size_t init_cap, size_t __datasz,
                       int* out_status);
 void genc_vector_deinit(struct genc_vector* v, int* out_status);
@@ -178,12 +166,6 @@ struct name                                                                    \
     type * data;                                                               \
     size_t size;                                                               \
     size_t cap;                                                                \
-};                                                                             \
-                                                                               \
-struct name##_view                                                             \
-{                                                                              \
-    const type * data;                                                         \
-    size_t size;                                                               \
 };                                                                             \
                                                                                \
 static inline void                                                             \
