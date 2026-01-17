@@ -28,7 +28,7 @@ int main()
 
    for(i = 0; i < v.size; i++)
    {
-       printf("%ld ", v.data[i]);
+       printf("%p ", v.data[i]);
    }
    printf("\n");
 
