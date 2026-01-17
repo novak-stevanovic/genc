@@ -181,7 +181,7 @@ name##_deinit(struct name * v, int* out)                                       \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_ins(struct name * v, const type data, size_t pos, int* out)             \
+name##_ins(struct name * v, type data, size_t pos, int* out)                   \
 {                                                                              \
     genc_vector_ins((struct genc_vector*)v, (const void*)&data, pos,           \
                     sizeof( type ), growf, out);                               \
@@ -200,7 +200,7 @@ name##_fit(struct name * v, int* out)                                          \
 }                                                                              \
                                                                                \
 static inline size_t                                                           \
-name##_find(const struct name * v, const type data, int* out)                  \
+name##_find(const struct name * v, type data, int* out)                        \
 {                                                                              \
     return genc_vector_find((const struct genc_vector*)v, (const void*)&data,  \
                             cmp_fn, sizeof( type ), out);                      \
@@ -213,21 +213,21 @@ name##_popb(struct name * v, int* out)                                         \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_rm(struct name * v, const type data, int* out)                          \
+name##_rm(struct name * v, type data, int* out)                                \
 {                                                                              \
     genc_vector_rm((struct genc_vector*)v, (const void*)&data,                 \
                    cmp_fn, sizeof( type ), out);                               \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_pushb(struct name * v, const type data, int* out)                       \
+name##_pushb(struct name * v, type data, int* out)                             \
 {                                                                              \
     genc_vector_pushb((struct genc_vector*)v, (const void*)&data,              \
                       sizeof( type ), growf, out);                             \
 }                                                                              \
                                                                                \
 static inline bool                                                             \
-name##_exists(const struct name * v, const type data, int* out)                \
+name##_exists(const struct name * v, type data, int* out)                      \
 {                                                                              \
     return genc_vector_exists((const struct genc_vector*)v,                    \
                               (const void*)&data, cmp_fn,                      \
@@ -452,14 +452,14 @@ name##_deinit(struct name * l, int* out)                                       \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_pushb(struct name * l, const type data, int* out)                       \
+name##_pushb(struct name * l, type data, int* out)                             \
 {                                                                              \
     genc_list_pushb((struct genc_list*)l, (const void*)&data,                  \
                     sizeof( type ), out);                                      \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_pushf(struct name * l, const type data, int* out)                       \
+name##_pushf(struct name * l, type data, int* out)                             \
 {                                                                              \
     genc_list_pushf((struct genc_list*)l, (const void*)&data,                  \
                     sizeof( type ), out);                                      \
@@ -478,7 +478,7 @@ name##_popb(struct name * l, int* out)                                         \
 }                                                                              \
                                                                                \
 static inline struct name##_node*                                              \
-name##_find(const struct name * l, const type data, int* out)                  \
+name##_find(const struct name * l, type data, int* out)                        \
 {                                                                              \
     struct genc_list_node* _node;                                              \
     _node = genc_list_find((struct genc_list*)l, (const void*)&data, cmp_fn,   \
@@ -495,7 +495,7 @@ name##_at(const struct name * l, size_t pos, int* out)                         \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_ins_after_node(struct name * l, const type data,                        \
+name##_ins_after_node(struct name * l, type data,                              \
                       struct name##_node* node, int* out)                      \
 {                                                                              \
     genc_list_ins_after_node((struct genc_list*)l, (const void*)&data,         \
@@ -504,7 +504,7 @@ name##_ins_after_node(struct name * l, const type data,                        \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_ins_before_node(struct name * l, const type data,                       \
+name##_ins_before_node(struct name * l, type data,                             \
                        struct name##_node* node, int* out)                     \
 {                                                                              \
     genc_list_ins_before_node((struct genc_list*)l, (const void*)&data,        \
@@ -520,7 +520,7 @@ name##_rm_node(struct name * l, struct name##_node* node, int* out)            \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_ins_at(struct name * l, const type data, size_t pos, int* out)          \
+name##_ins_at(struct name * l, type data, size_t pos, int* out)                \
 {                                                                              \
     genc_list_ins_at((struct genc_list*)l, (const void*)&data, pos,            \
                      sizeof( type ), out);                                     \
@@ -528,14 +528,14 @@ name##_ins_at(struct name * l, const type data, size_t pos, int* out)          \
 }                                                                              \
                                                                                \
 static inline void                                                             \
-name##_rm(struct name * l, const type data, int* out)                          \
+name##_rm(struct name * l, type data, int* out)                                \
 {                                                                              \
     genc_list_rm((struct genc_list*)l, (const void*)&data, cmp_fn,             \
                  sizeof( type ), out);                                         \
 }                                                                              \
                                                                                \
 static inline bool                                                             \
-name##_exists(const struct name * l, const type data, int* out)                \
+name##_exists(const struct name * l, type data, int* out)                      \
 {                                                                              \
     return genc_list_exists((const struct genc_list*)l, (const void*)&data,    \
                             cmp_fn, sizeof( type ), out);                      \
@@ -572,8 +572,8 @@ name##_exists(const struct name * l, const type data, int* out)                \
  *
  * void <name>_init(struct <name>* list, int* out_status);
  * void <name>_deinit(struct <name>* list, int* out_status);
- * void <name>_pushb(struct <name>* list, const <type> data, int* out_status);
- * void <name>_pushf(struct <name>* list, const <type> data, int* out_status);
+ * void <name>_pushb(struct <name>* list, <type> data, int* out_status);
+ * void <name>_pushf(struct <name>* list, <type> data, int* out_status);
  * void <name>_popf(struct <name>* list, int* out_status);
  *
  * ---------------------------------------------------------
@@ -659,13 +659,13 @@ void name##_deinit(struct name * list, int* out)                               \
     genc_simple_list_deinit((struct genc_simple_list*)list, out);              \
 }                                                                              \
                                                                                \
-void name##_pushb(struct name * l, const type data, int* out)                  \
+void name##_pushb(struct name * l, type data, int* out)                        \
 {                                                                              \
     genc_simple_list_pushb((struct genc_simple_list*)l,                        \
                            (const void*)&data, sizeof( type ), out);           \
 }                                                                              \
                                                                                \
-void name##_pushf(struct name * l, const type data, int* out)                  \
+void name##_pushf(struct name * l, type data, int* out)                        \
 {                                                                              \
     genc_simple_list_pushf((struct genc_simple_list*)l,                        \
                            (const void*)&data, sizeof( type ), out);           \
