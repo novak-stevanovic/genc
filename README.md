@@ -1,6 +1,6 @@
 # Gen-C
 
-__Gen-C__ is a user-friendly typesafe generic container library in C. It features a vector and a doubly linked list. Its aim is to provide robust error-handling.
+__Gen-C__ is a user-friendly, type-safe generic container library for C. It provides macro-generated vectors, doubly linked lists, and simple forward lists, with a strong focus on robust error handling.
 
 ## Dependencies
 
