@@ -44,6 +44,10 @@ THE SOFTWARE.
 
 typedef int (*genc_cmp_fn)(const void* container_data, const void* user_data);
 
+/* A function that accepts an `out_status` parameter reports success by
+ * setting it to 0, and reports failure by setting it to the appropriate
+ * error code. */
+
 #define GENC_ERR_BASE 1000
 #define GENC_ERR_INVALID_ARG (GENC_ERR_BASE + 1)
 #define GENC_ERR_ALLOC_FAIL (GENC_ERR_BASE + 2)
