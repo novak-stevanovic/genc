@@ -1,9 +1,9 @@
 #include "genc.h"
 
-GENC_VECTOR_GENERATE(int_vec, int, 2.0);
-GENC_VECTOR_GENERATE(intptr_vec, int*, 2.0);
-GENC_LIST_GENERATE(int_list, int);
-GENC_FWD_LIST_GENERATE(int_fwd_list, int);
+GENC_VECTOR_GENERATE(int_vec, int, 2.0)
+GENC_VECTOR_GENERATE(intptr_vec, int*, 2.0)
+GENC_LIST_GENERATE(int_list, int)
+GENC_FWD_LIST_GENERATE(int_fwd_list, int)
 
 #include <assert.h>
 #include <stdio.h>
