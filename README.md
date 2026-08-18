@@ -1,6 +1,6 @@
 # Gen-C
 
-__Gen-C__ is a user-friendly, type-safe generic container library for C. It provides macro-generated vectors, doubly linked lists, and simple forward lists, with a strong focus on robust error handling.
+__Gen-C__ is a user-friendly, type-safe generic container library for C. It provides macro-generated vectors, doubly linked lists, and forward lists.
 
 ## Dependencies
 
@@ -14,7 +14,7 @@ You can install the header by using the Makefile: `make install [PREFIX=...]` - 
 
 ## Usage instructions:
 
-If you are using the library as __header-only__, simply include the header in your project. Then use generator macros for the type you need, for example:
+Simply include the header in your project. Then use generator macros for the type you need, for example:
 
 ```
 GENC_VECTOR_INLINE(int_vec, int, 2.0)
