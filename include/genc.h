@@ -37,7 +37,7 @@ THE SOFTWARE.
 #include <stdbool.h>
 
 #define GENC_ERR_BASE 1000
-#define GENC_ERR_INVALID_ARG (GENC_ERR_BASE + 1)
+#define GENC_ERR_INV_ARG (GENC_ERR_BASE + 1)
 #define GENC_ERR_ALLOC_FAIL (GENC_ERR_BASE + 2)
 #define GENC_ERR_OUT_OF_BOUNDS (GENC_ERR_BASE + 3)
 #define GENC_ERR_NO_DATA (GENC_ERR_BASE + 4)
@@ -86,7 +86,7 @@ size_t <name>_cap(const struct <name>* vec);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `vec` is NULL.
+* GENC_ERR_INV_ARG: `vec` is NULL.
 
 int <name>_deinit(struct <name>* vec);
 
@@ -97,7 +97,7 @@ int <name>_deinit(struct <name>* vec);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `vec` is NULL.
+* GENC_ERR_INV_ARG: `vec` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_pushb(struct <name>* vec, <type> data);
@@ -109,7 +109,7 @@ int <name>_pushb(struct <name>* vec, <type> data);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `vec` is NULL.
+* GENC_ERR_INV_ARG: `vec` is NULL.
 * GENC_ERR_NO_DATA: The vector is empty.
 
 int <name>_popb(struct <name>* vec);
@@ -121,7 +121,7 @@ int <name>_popb(struct <name>* vec);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `vec` is NULL.
+* GENC_ERR_INV_ARG: `vec` is NULL.
 * GENC_ERR_OUT_OF_BOUNDS: `pos` is greater than the vector size.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
@@ -134,7 +134,7 @@ int <name>_ins(struct <name>* vec, <type> data, size_t pos);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `vec` is NULL.
+* GENC_ERR_INV_ARG: `vec` is NULL.
 * GENC_ERR_OUT_OF_BOUNDS: `pos` is outside the vector.
 
 int <name>_rm_at(struct <name>* vec, size_t pos);
@@ -146,7 +146,7 @@ int <name>_rm_at(struct <name>* vec, size_t pos);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `vec` is NULL.
+* GENC_ERR_INV_ARG: `vec` is NULL.
 
 int <name>_empty(struct <name>* vec);
 
@@ -157,7 +157,7 @@ int <name>_empty(struct <name>* vec);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `vec` is NULL.
+* GENC_ERR_INV_ARG: `vec` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_fit(struct <name>* vec);
@@ -169,7 +169,7 @@ int <name>_fit(struct <name>* vec);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `vec` is NULL.
+* GENC_ERR_INV_ARG: `vec` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_prealloc(struct <name>* vec, size_t size);
@@ -317,7 +317,7 @@ size_t <name>_size(const struct <name>* list);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 
 int <name>_deinit(struct <name>* list);
 
@@ -328,7 +328,7 @@ int <name>_deinit(struct <name>* list);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_pushb(struct <name>* list, <type> data);
@@ -340,7 +340,7 @@ int <name>_pushb(struct <name>* list, <type> data);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_pushf(struct <name>* list, <type> data);
@@ -352,7 +352,7 @@ int <name>_pushf(struct <name>* list, <type> data);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_NO_DATA: The list is empty.
 
 int <name>_popb(struct <name>* list);
@@ -364,7 +364,7 @@ int <name>_popb(struct <name>* list);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_NO_DATA: The list is empty.
 
 int <name>_popf(struct <name>* list);
@@ -376,7 +376,7 @@ int <name>_popf(struct <name>* list);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 
 int <name>_empty(struct <name>* list);
 
@@ -395,7 +395,7 @@ struct <name>_node* <name>_at(const struct <name>* list, size_t pos);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_ins_after_node(struct <name>* list, <type> data,
@@ -408,7 +408,7 @@ int <name>_ins_after_node(struct <name>* list, <type> data,
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` or `node` is NULL.
+* GENC_ERR_INV_ARG: `list` or `node` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_ins_before_node(struct <name>* list, <type> data,
@@ -421,7 +421,7 @@ int <name>_ins_before_node(struct <name>* list, <type> data,
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_OUT_OF_BOUNDS: `pos` is greater than the list size.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
@@ -434,7 +434,7 @@ int <name>_ins_at(struct <name>* list, <type> data, size_t pos);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` or `node` is NULL.
+* GENC_ERR_INV_ARG: `list` or `node` is NULL.
 
 int <name>_rm_node(struct <name>* list, struct <name>_node* node);
 
@@ -635,7 +635,7 @@ size_t <name>_size(const struct <name>* list);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 
 int <name>_deinit(struct <name>* list);
 
@@ -646,7 +646,7 @@ int <name>_deinit(struct <name>* list);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_pushb(struct <name>* list, <type> data);
@@ -658,7 +658,7 @@ int <name>_pushb(struct <name>* list, <type> data);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed.
 
 int <name>_pushf(struct <name>* list, <type> data);
@@ -670,7 +670,7 @@ int <name>_pushf(struct <name>* list, <type> data);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 * GENC_ERR_NO_DATA: The list is empty.
 
 int <name>_popf(struct <name>* list);
@@ -682,7 +682,7 @@ int <name>_popf(struct <name>* list);
 * RETURN VALUE: 0 on success, error code on failure.
 
 * ERROR CODES:
-* GENC_ERR_INVALID_ARG: `list` is NULL.
+* GENC_ERR_INV_ARG: `list` is NULL.
 
 int <name>_empty(struct <name>* list);
 
@@ -893,7 +893,7 @@ int genc_fwd_list_empty(struct genc_fwd_list* list);
 #define GENC_NOT_NULL(ptr)                                                     \
     do                                                                         \
     {                                                                          \
-        if(!(ptr)) return GENC_ERR_INVALID_ARG;                                \
+        if(!(ptr)) return GENC_ERR_INV_ARG;                                    \
     } while(0)
 
 /* ========================================================================== */
