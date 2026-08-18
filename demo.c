@@ -1,9 +1,9 @@
 #include "genc.h"
 
-GENC_VECTOR_GENERATE(int_vec, int, 2.0)
-GENC_VECTOR_GENERATE(intptr_vec, int*, 2.0)
-GENC_LIST_GENERATE(int_list, int)
-GENC_FWD_LIST_GENERATE(int_fwd_list, int)
+GENC_VECTOR_INLINE(int_vec, int, 2.0)
+GENC_VECTOR_INLINE(intptr_vec, int*, 2.0)
+GENC_LIST_INLINE(int_list, int)
+GENC_FWD_LIST_INLINE(int_fwd_list, int)
 
 #include <assert.h>
 #include <stdio.h>
@@ -28,9 +28,9 @@ int main()
         assert(!status);
     }
 
-    for(i = 0; i < intptr_vec_size(&v); i++)
+    for(i = 0; i < v.size; i++)
     {
-        printf("%p ", intptr_vec_data(&v)[i]);
+        printf("%p ", v.data[i]);
     }
     printf("\n");
 
@@ -45,12 +45,12 @@ int main()
     status = int_list_pushf(&list, 5);
     assert(!status);
 
-    struct int_list_node* it_node = int_list_head(&list);
+    struct int_list_node* it_node = list.head;
     while(it_node)
     {
-        printf("%d ", *int_list_node_data(it_node));
+        printf("%d ", it_node->data);
 
-        it_node = int_list_node_next(it_node);
+        it_node = it_node->next;
     }
 
     printf("\n");
