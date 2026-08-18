@@ -30,7 +30,7 @@ int main()
 
     for(i = 0; i < intptr_vec_size(&v); i++)
     {
-        printf("%p ", (intptr_vec_data(&v))[i]);
+        printf("%p ", intptr_vec_data(&v)[i]);
     }
     printf("\n");
 
