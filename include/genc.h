@@ -24,14 +24,14 @@ THE SOFTWARE.
 
 */
 
-#ifndef GENC_H
-#define GENC_H
-
 /* ========================================================================== */
 /* -------------------------------------------------------------------------- */
 /* HEADER - PUBLIC */
 /* -------------------------------------------------------------------------- */
 /* ========================================================================== */
+
+#ifndef GENC_H
+#define GENC_H
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -873,6 +873,8 @@ int genc_fwd_list_pushf(struct genc_fwd_list* list, const void* _data,
 int genc_fwd_list_popf(struct genc_fwd_list* list);
 
 int genc_fwd_list_empty(struct genc_fwd_list* list);
+
+/* ========================================================================== */
 
 #endif // GENC_H
 
