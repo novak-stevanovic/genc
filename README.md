@@ -2,6 +2,10 @@
 
 __Gen-C__ is a user-friendly, type-safe generic container library for C. It provides macro-generated vectors, doubly linked lists, and forward lists.
 
+## Requirements
+
+- C99 or newer hosted implementation
+
 ## Dependencies
 
 This library is stand-alone.
