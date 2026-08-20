@@ -14,7 +14,7 @@ This library is stand-alone.
 
 This library is meant to be used as header-only.
 
-You can install the header by using the Makefile: `make install [PREFIX=...]` - This will place the public headers inside `PREFIX/include`. Default value is `PREFIX=/usr/local`
+You can install the header by using the Makefile: `make install` - This will place the headers and the pkgconf file in the specified folder. The Makefile is configurable.
 
 ## Usage instructions:
 

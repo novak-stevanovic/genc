@@ -1,95 +1,85 @@
-# -----------------------------------------------------------------------------
-# Validation
-# -----------------------------------------------------------------------------
+# =============================================================================
+# PUBLIC
+# =============================================================================
 
-GOAL_COUNT := $(words $(MAKECMDGOALS))
+LIB := genc
 
-ifneq ($(GOAL_COUNT),1)
-    ifneq ($(GOAL_COUNT),0)
-        $(error You cannot specify more than 1 target \
-(got $(GOAL_COUNT): $(MAKECMDGOALS)))
-    endif
-endif
+PREFIX := /usr/local
+PC_PREFIX := $(PREFIX)/lib/pkgconfig
 
-# -----------------------------------------------------------------------------
-# Public Settings
-# -----------------------------------------------------------------------------
-
-PREFIX ?= /usr/local
-CC ?= gcc
-
-DEBUG ?= 0
-
-# -----------------------------------------------------------------------------
-# Private Settings
-# -----------------------------------------------------------------------------
-
-LIB_NAME = genc
-
-INSTALL_INCLUDE = include/genc.h
-INSTALL_DIR = $(PREFIX)/include/$(LIB_NAME)
-
-DEBUG_FLAG =
-ifeq ($(DEBUG),1)
-    DEBUG_FLAG = -g
-endif
-
-# -----------------------------------------------------------------------------
-# Build Flags
-# -----------------------------------------------------------------------------
+CC := gcc
 
 # ---------------------------------------------------------
-# Demo Flags
+# Demo
 # ---------------------------------------------------------
 
-DEMO_CFLAGS_STD = -std=c99
-DEMO_CFLAGS_DEBUG = $(DEBUG_FLAG)
-DEMO_CFLAGS_OPTIMIZATION = -O0
-DEMO_CFLAGS_WARN = -Wall
-DEMO_CFLAGS_MAKE = -MMD -MP
-DEMO_CFLAGS_INCLUDE = -Iinclude
+DEMO_CFLAGS := -Iinclude -std=c99 -O0 -Wall -Wextra -Wpedantic -g
 
-ifeq ($(DEBUG),1)
-    DEMO_CFLAGS_WARN = -Wall -Wpedantic -Wextra
-endif
+# =============================================================================
+# PRIVATE
+# =============================================================================
 
-DEMO_CFLAGS = -c $(DEMO_CFLAGS_STD) $(DEMO_CFLAGS_INCLUDE) \
-$(DEMO_CFLAGS_MAKE) $(DEMO_CFLAGS_WARN) $(DEMO_CFLAGS_DEBUG) \
-$(DEMO_CFLAGS_OPTIMIZATION)
+LIB_PC := $(LIB).pc
+INSTALL_INCLUDE := include/genc.h
 
-# -----------------------------------------------------------------------------
-# Targets
-# -----------------------------------------------------------------------------
+PC_INCLUDEDIR := $${prefix}/include
+PC_NAME := $(LIB)
+PC_DESCRIPTION := Generic data structures library
+PC_VERSION := 1.0.0
+PC_CFLAGS := -I$${includedir}/$(LIB)
 
-.PHONY: all clean install uninstall
+# =============================================================================
+# TARGETS
+# =============================================================================
 
-all: demo
+.PHONY: all demo install uninstall clean
 
-# demo ------------------------------------------------------------------------
+all:
 
-demo: build/demo.o
-	$(CC) build/demo.o -o $@
+# ---------------------------------------------------------
+# demo
+# ---------------------------------------------------------
 
-build/demo.o: demo.c
-	@mkdir -p $(dir $@)
-	$(CC) $(DEMO_CFLAGS) demo.c -o $@
+demo: demo.c
+	$(CC) $(DEMO_CFLAGS) $< -o $@
 
--include build/demo.d
+# ---------------------------------------------------------
+# pkgconf
+# ---------------------------------------------------------
 
-# install ---------------------------------------------------------------------
+$(LIB_PC):
+	@echo 'prefix=$(PREFIX)' > $@
+	@echo 'includedir=$(PC_INCLUDEDIR)' >> $@
+	@echo '' >> $@
+	@echo 'Name: $(PC_NAME)' >> $@
+	@echo 'Description: $(PC_DESCRIPTION)' >> $@
+	@echo 'Version: $(PC_VERSION)' >> $@
+	@echo 'Cflags: $(PC_CFLAGS)' >> $@
 
-install:
-	@mkdir -p $(INSTALL_DIR)
-	cp $(INSTALL_INCLUDE) $(INSTALL_DIR)/
+# ---------------------------------------------------------
+# install
+# ---------------------------------------------------------
 
-# uninstall -------------------------------------------------------------------
+install: $(LIB_PC)
+	install -d $(PREFIX)/include/$(LIB)
+	install -m 644 $(INSTALL_INCLUDE) $(PREFIX)/include/$(LIB)/
+	install -d $(PC_PREFIX)
+	install -m 644 $(LIB_PC) $(PC_PREFIX)/$(LIB_PC)
+
+# ---------------------------------------------------------
+# uninstall
+# ---------------------------------------------------------
 
 uninstall:
-	rm -rf $(INSTALL_DIR)
+	rm -rf $(PREFIX)/include/$(LIB)
+	rm -f $(PC_PREFIX)/$(LIB_PC)
 
-# clean -----------------------------------------------------------------------
+# ---------------------------------------------------------
+# clean
+# ---------------------------------------------------------
 
 clean:
-	rm -rf build
 	rm -f demo
+	rm -f $(LIB_PC)
 	rm -f compile_commands.json
+	rm -f gdb.txt
