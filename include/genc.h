@@ -145,10 +145,22 @@ int <name>_popb_many(struct <name>* vec, size_t count);
 
 |----------------------------------------------------------|
 
-* Removes `count` elements starting at `pos` and may shrink allocated
-* capacity when the vector becomes sufficiently sparse.
-* Shrinking is best-effort: failure to reduce capacity does not make the
-* remove operation fail. If the vector becomes empty, its storage is freed.
+* Shrinks allocated capacity when the vector is sufficiently sparse.
+* The shrink threshold and resulting capacity are derived from GROWF.
+* If the vector is empty, all allocated storage is freed.
+* Shrinking is best-effort: failure to reduce capacity is not an error.
+
+* RETURN VALUE: 0 on success, error code on failure.
+
+* ERROR CODES:
+* GENC_ERR_INV_ARG: `vec` is NULL.
+
+int <name>_shrink(struct <name>* vec);
+
+|----------------------------------------------------------|
+
+* Removes `count` elements starting at `pos`. Then, a call to
+* <name>_shrink() is performed.
 
 * RETURN VALUE: 0 on success, error code on failure.
 
@@ -161,10 +173,8 @@ int <name>_rm_at_many_shrink(struct <name>* vec, size_t pos, size_t count);
 
 |----------------------------------------------------------|
 
-* Removes `count` elements from the back of the vector and may shrink
-* allocated capacity.
-* Shrinking is best-effort: failure to reduce capacity does not make the
-* remove operation fail. If the vector becomes empty, its storage is freed.
+* Removes `count` elements from the back of the vector. Then,
+* a call to <name>_shrink() is performed.
 
 * RETURN VALUE: 0 on success, error code on failure.
 
@@ -309,63 +319,63 @@ int <name>_prealloc(struct <name>* vec, size_t size);
 /* VECTOR - DECLARE */
 /* -------------------------------------------------------------------------- */
 
-#define GENC_VECTOR_DECLARE(NAME, TYPE, FN_PREFIX)                              \
-struct NAME                                                                     \
-{                                                                               \
-    TYPE * data;                                                                \
-    size_t size;                                                                \
-    size_t cap;                                                                 \
-};                                                                              \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_deinit(struct NAME * v);                                                 \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_ins_many(struct NAME * v, TYPE const * data, size_t count, size_t pos);  \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_pushb_many(struct NAME * v, TYPE const * data, size_t count);            \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_rm_at_many(struct NAME * v, size_t pos, size_t count);                   \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_popb_many(struct NAME * v, size_t count);                                \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_rm_at_many_shrink(struct NAME * v, size_t pos, size_t count);            \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_popb_many_shrink(struct NAME * v, size_t count);                         \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_ins(struct NAME * v, TYPE data, size_t pos);                             \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_pushb(struct NAME * v, TYPE data);                                       \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_rm_at(struct NAME * v, size_t pos);                                      \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_popb(struct NAME * v);                                                   \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_rm_at_shrink(struct NAME * v, size_t pos);                               \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_popb_shrink(struct NAME * v);                                            \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_empty(struct NAME * v);                                                  \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_empty_shrink(struct NAME * v);                                           \
-                                                                                \
-FN_PREFIX int                                                                   \
-NAME##_fit(struct NAME * v);                                                    \
-                                                                                \
-FN_PREFIX int                                                                   \
+#define GENC_VECTOR_DECLARE(NAME, TYPE, FN_PREFIX)                             \
+struct NAME                                                                    \
+{                                                                              \
+    TYPE * data;                                                               \
+    size_t size;                                                               \
+    size_t cap;                                                                \
+};                                                                             \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_deinit(struct NAME * v);                                                \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_ins_many(struct NAME * v, TYPE const * data, size_t count, size_t pos); \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_pushb_many(struct NAME * v, TYPE const * data, size_t count);           \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_rm_at_many(struct NAME * v, size_t pos, size_t count);                  \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_popb_many(struct NAME * v, size_t count);                               \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_rm_at_many_shrink(struct NAME * v, size_t pos, size_t count);           \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_popb_many_shrink(struct NAME * v, size_t count);                        \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_ins(struct NAME * v, TYPE data, size_t pos);                            \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_pushb(struct NAME * v, TYPE data);                                      \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_rm_at(struct NAME * v, size_t pos);                                     \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_popb(struct NAME * v);                                                  \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_rm_at_shrink(struct NAME * v, size_t pos);                              \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_popb_shrink(struct NAME * v);                                           \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_empty(struct NAME * v);                                                 \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_empty_shrink(struct NAME * v);                                          \
+                                                                               \
+FN_PREFIX int                                                                  \
+NAME##_fit(struct NAME * v);                                                   \
+                                                                               \
+FN_PREFIX int                                                                  \
 NAME##_prealloc(struct NAME * v, size_t size);
 
 /* -------------------------------------------------------------------------- */
@@ -475,6 +485,38 @@ NAME##_rm_at_many(struct NAME * v, size_t pos, size_t count)                   \
 }                                                                              \
                                                                                \
 FN_PREFIX int                                                                  \
+NAME##_shrink(struct NAME * v)                                                 \
+{                                                                              \
+    if(!v) return GENC_ERR_INV_ARG;                                            \
+                                                                               \
+    if(v->size == 0)                                                           \
+    {                                                                          \
+        free(v->data);                                                         \
+        v->data = NULL;                                                        \
+        v->cap = 0;                                                            \
+                                                                               \
+        return 0;                                                              \
+    }                                                                          \
+                                                                               \
+    double growf_adj = ((GROWF) > 1.1 ? (GROWF) : 1.1);                        \
+    size_t threshold = (size_t)((double)v->cap / growf_adj / growf_adj);       \
+                                                                               \
+    if(v->size < threshold)                                                    \
+    {                                                                          \
+        size_t new_cap = (size_t)((double)v->size * growf_adj);                \
+        if(new_cap < v->size) new_cap = v->size;                               \
+                                                                               \
+        void* new_data = realloc(v->data, new_cap * sizeof(TYPE));             \
+        if(!new_data) return 0;                                                \
+                                                                               \
+        v->data = new_data;                                                    \
+        v->cap = new_cap;                                                      \
+    }                                                                          \
+    return 0;                                                                  \
+                                                                               \
+}                                                                              \
+                                                                               \
+FN_PREFIX int                                                                  \
 NAME##_popb_many(struct NAME * v, size_t count)                                \
 {                                                                              \
     if(!v) return GENC_ERR_INV_ARG;                                            \
@@ -504,28 +546,13 @@ NAME##_rm_at_many_shrink(struct NAME * v, size_t pos, size_t count)            \
     int status = NAME##_rm_at_many(v, pos, count);                             \
     if(status != 0) return GENC_ERR_UNEXPECTED;                                \
                                                                                \
-    if(v->size == 0)                                                           \
+    status = NAME##_shrink(v);                                                 \
+    switch(status)                                                             \
     {                                                                          \
-        free(v->data);                                                         \
-        v->data = NULL;                                                        \
-        v->cap = 0;                                                            \
-                                                                               \
-        return 0;                                                              \
-    }                                                                          \
-                                                                               \
-    double growf_adj = ((GROWF) > 1.1 ? (GROWF) : 1.1);                        \
-    size_t threshold = (size_t)((double)v->cap / growf_adj / growf_adj);       \
-                                                                               \
-    if(v->size < threshold)                                                    \
-    {                                                                          \
-        size_t new_cap = (size_t)((double)v->size * growf_adj);                \
-        if(new_cap < v->size) new_cap = v->size;                               \
-                                                                               \
-        void* new_data = realloc(v->data, new_cap * sizeof(TYPE));             \
-        if(!new_data) return 0;                                                \
-                                                                               \
-        v->data = new_data;                                                    \
-        v->cap = new_cap;                                                      \
+        case 0:                                                                \
+            return 0;                                                          \
+        default:                                                               \
+            return GENC_ERR_UNEXPECTED;                                        \
     }                                                                          \
                                                                                \
     return 0;                                                                  \
