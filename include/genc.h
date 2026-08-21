@@ -102,7 +102,7 @@ int <name>_deinit(struct <name>* vec);
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed or the required capacity
 * cannot be represented.
 
-int <name>_ins_many(struct <name>* vec, <type>* data,
+int <name>_ins_many(struct <name>* vec, <type> const * data,
                     size_t count, size_t pos);
 
 |----------------------------------------------------------|
@@ -116,7 +116,7 @@ int <name>_ins_many(struct <name>* vec, <type>* data,
 * GENC_ERR_ALLOC_FAIL: Memory allocation failed or the required capacity
 * cannot be represented.
 
-int <name>_pushb_many(struct <name>* vec, <type>* data, size_t count);
+int <name>_pushb_many(struct <name>* vec, <type> const* data, size_t count);
 
 |----------------------------------------------------------|
 
@@ -157,8 +157,7 @@ int <name>_popb_many(struct <name>* vec, size_t count);
 * GENC_ERR_OUT_OF_BOUNDS: The range [`pos`, `pos + count`) is outside the
 * vector.
 
-int <name>_rm_at_many_shrink(struct <name>* vec,
-                             size_t pos, size_t count);
+int <name>_rm_at_many_shrink(struct <name>* vec, size_t pos, size_t count);
 
 |----------------------------------------------------------|
 
@@ -322,10 +321,10 @@ FN_PREFIX int                                                                   
 NAME##_deinit(struct NAME * v);                                                 \
                                                                                 \
 FN_PREFIX int                                                                   \
-NAME##_ins_many(struct NAME * v, TYPE * data, size_t count, size_t pos);        \
+NAME##_ins_many(struct NAME * v, TYPE const * data, size_t count, size_t pos);  \
                                                                                 \
 FN_PREFIX int                                                                   \
-NAME##_pushb_many(struct NAME * v, TYPE * data, size_t count);                  \
+NAME##_pushb_many(struct NAME * v, TYPE const * data, size_t count);            \
                                                                                 \
 FN_PREFIX int                                                                   \
 NAME##_rm_at_many(struct NAME * v, size_t pos, size_t count);                   \
@@ -388,7 +387,7 @@ NAME##_deinit(struct NAME * v)                                                 \
 }                                                                              \
                                                                                \
 FN_PREFIX int                                                                  \
-NAME##_ins_many(struct NAME * v, TYPE * data, size_t count, size_t pos)        \
+NAME##_ins_many(struct NAME * v, TYPE const * data, size_t count, size_t pos)  \
 {                                                                              \
     if(!v || (!data && count > 0))                                             \
         return GENC_ERR_INV_ARG;                                               \
@@ -438,7 +437,7 @@ NAME##_ins_many(struct NAME * v, TYPE * data, size_t count, size_t pos)        \
 }                                                                              \
                                                                                \
 FN_PREFIX int                                                                  \
-NAME##_pushb_many(struct NAME * v, TYPE * data, size_t count)                  \
+NAME##_pushb_many(struct NAME * v, TYPE const * data, size_t count)            \
 {                                                                              \
     if(!v || (!data && count > 0))                                             \
         return GENC_ERR_INV_ARG;                                               \
