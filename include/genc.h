@@ -343,6 +343,9 @@ FN_PREFIX int                                                                  \
 NAME##_popb_many(struct NAME * v, size_t count);                               \
                                                                                \
 FN_PREFIX int                                                                  \
+NAME##_shrink(struct NAME * v);                                                \
+                                                                               \
+FN_PREFIX int                                                                  \
 NAME##_rm_at_many_shrink(struct NAME * v, size_t pos, size_t count);           \
                                                                                \
 FN_PREFIX int                                                                  \
