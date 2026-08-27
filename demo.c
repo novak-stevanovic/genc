@@ -4,6 +4,8 @@ GENC_VECTOR_INLINE(int_vec, int, 2.0)
 GENC_VECTOR_INLINE(intptr_vec, int*, 2.0)
 GENC_LIST_INLINE(int_list, int)
 GENC_FWD_LIST_INLINE(int_fwd_list, int)
+GENC_OPT_INLINE(ntg_uint8_opt, uint8_t)
+typedef struct ntg_uint8_opt ntg_uint8_opt;
 
 #include <assert.h>
 #include <stdio.h>
@@ -57,6 +59,11 @@ int main()
 
     status = int_list_deinit(&list);
     assert(!status);
+
+    ntg_uint8_opt myint1 = { .set = true, .val = 100 };
+    ntg_uint8_opt myint2 = ntg_uint8_opt_new(200);
+    ntg_uint8_opt myint3 = {0};
+    printf("%d\n", ntg_uint8_opt_get(myint3, 1));
 
     return 0;
 }
