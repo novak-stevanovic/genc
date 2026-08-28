@@ -83,7 +83,7 @@ struct <name> <name>_new(<type> val);
 
 Helper zero-init function.
 
-struct <name> <name>_zero();
+struct <name> <name>_zero(void);
 
 |----------------------------------------------------------|
 
@@ -120,7 +120,7 @@ NAME##_get( struct NAME var , TYPE deflt )                                     \
 }                                                                              \
                                                                                \
 static inline struct NAME                                                      \
-NAME##_zero()                                                                  \
+NAME##_zero(void)                                                              \
 {                                                                              \
     return ( struct NAME ) {0};                                                \
 }
