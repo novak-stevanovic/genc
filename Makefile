@@ -32,7 +32,7 @@ PC_CFLAGS := -I$${includedir}/$(LIB)
 # TARGETS
 # =============================================================================
 
-.PHONY: all demo install uninstall clean
+.PHONY: all install uninstall clean
 
 all:
 
